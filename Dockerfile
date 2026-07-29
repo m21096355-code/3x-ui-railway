@@ -3,9 +3,8 @@ FROM alpine:3.19
 ENV TZ=Europe/Amsterdam
 ENV XUI_IN_DOCKER=true
 ENV XUI_BIN_FOLDER=/app/bin
-ENV XUI_PORT=2054
 
-RUN apk add --no-cache bash curl ca-certificates tzdata openssl jq
+RUN apk add --no-cache bash curl ca-certificates tzdata openssl
 
 # Download 3x-ui release
 RUN mkdir -p /app/bin /etc/x-ui /var/log/x-ui && \
@@ -29,13 +28,13 @@ RUN cd /app/bin && \
     curl -fsSL -o geoip.dat https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat && \
     curl -fsSL -o geosite.dat https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat
 
-# Copy startup script
-COPY start.sh /start.sh
-RUN chmod +x /start.sh /app/x-ui /app/bin/xray-linux-amd64
+# Copy pre-configured database with inbound already set up
+COPY x-ui.db /etc/x-ui/x-ui.db
+
+RUN chmod +x /app/x-ui /app/bin/xray-linux-amd64
 
 WORKDIR /app
 
-EXPOSE 2053
+EXPOSE 2053 2096
 
-# Use ENTRYPOINT so Railway can't override it
-ENTRYPOINT ["/start.sh"]
+CMD ["./x-ui"]
