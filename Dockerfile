@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe/Amsterdam
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    bash curl ca-certificates tzdata wget \
+    bash curl ca-certificates tzdata wget unzip \
     && rm -rf /var/lib/apt/lists/*
 
 # Download 3x-ui binary
@@ -19,12 +19,10 @@ RUN mkdir -p /etc/x-ui /var/log/x-ui /etc/xray && \
 # Download Xray core
 RUN cd /tmp && \
     wget -q https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip && \
-    apt-get install -y --no-install-recommends unzip && \
     unzip -o Xray-linux-64.zip -d /usr/local/share/xray && \
     chmod +x /usr/local/share/xray/xray && \
     ln -sf /usr/local/share/xray/xray /usr/bin/xray && \
-    rm /tmp/Xray-linux-64.zip && \
-    apt-get remove -y unzip && apt-get autoremove -y
+    rm /tmp/Xray-linux-64.zip
 
 ENV XRAY_HIGH_LOGLEVEL=warning
 
