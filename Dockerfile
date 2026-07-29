@@ -19,18 +19,13 @@ RUN cd /tmp && \
 RUN cd /tmp && \
     wget -q https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip && \
     unzip -o Xray-linux-64.zip && \
-    chmod +x xray
+    chmod +x xray && \
+    mv xray /usr/local/bin/xray-core
 
-# x-ui launches xray as: bin/xray-linux-amd64 (relative to WORKDIR)
-# xray also writes config to bin/ (relative to its CWD = WORKDIR)
-# So we need bin/ directory at WORKDIR with xray inside
-WORKDIR /root
-RUN mkdir -p /root/bin && \
-    cp /tmp/xray /root/bin/xray-linux-amd64 && \
-    chmod +x /root/bin/xray-linux-amd64 && \
-    rm -f /tmp/xray /tmp/Xray-linux-64.zip
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
 
 ENV XRAY_HIGH_LOGLEVEL=warning
 EXPOSE 2053 2083 2087 2096 80 443
 
-CMD ["x-ui"]
+CMD ["/start.sh"]
