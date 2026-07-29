@@ -2,11 +2,12 @@ FROM alpine:3.19
 
 ENV TZ=Europe/Amsterdam
 ENV XUI_IN_DOCKER=true
+ENV XUI_BIN_FOLDER=/app/bin
 
 RUN apk add --no-cache bash curl ca-certificates tzdata openssl
 
 # Download 3x-ui release
-RUN mkdir -p /app/bin && \
+RUN mkdir -p /app/bin /etc/x-ui /var/log/x-ui && \
     cd /tmp && \
     curl -fsSL -o x-ui.tar.gz https://github.com/MHSanaei/3x-ui/releases/latest/download/x-ui-linux-amd64.tar.gz && \
     tar -xzf x-ui.tar.gz && \
@@ -20,19 +21,17 @@ RUN cd /tmp && \
     unzip -o xray.zip && \
     mv xray /app/bin/xray-linux-amd64 && \
     chmod +x /app/bin/xray-linux-amd64 && \
-    rm -f /tmp/xray.zip /tmp/geoip.dat /tmp/geosite.dat
+    rm -f /tmp/xray.zip
 
-# Download geo data
-RUN cd /app && \
+# Download geo data to /app/bin/ (where XRAY looks for it)
+RUN cd /app/bin && \
     curl -fsSL -o geoip.dat https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat && \
     curl -fsSL -o geosite.dat https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat
 
-# Startup script: ensure bin/ exists at CWD
-COPY start.sh /start.sh
-RUN chmod +x /start.sh /app/x-ui /app/bin/xray-linux-amd64
+RUN chmod +x /app/x-ui /app/bin/xray-linux-amd64
 
 WORKDIR /app
 
 EXPOSE 2053
 
-ENTRYPOINT ["/start.sh"]
+CMD ["./x-ui"]
