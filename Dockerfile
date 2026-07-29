@@ -3,7 +3,7 @@ FROM alpine:3.19
 ENV TZ=Europe/Amsterdam
 ENV XUI_IN_DOCKER=true
 
-RUN apk add --no-cache bash curl ca-certificates tzdata fail2ban openssl
+RUN apk add --no-cache bash curl ca-certificates tzdata openssl
 
 # Download 3x-ui release
 RUN mkdir -p /app/bin && \
@@ -27,10 +27,12 @@ RUN cd /app && \
     curl -fsSL -o geoip.dat https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat && \
     curl -fsSL -o geosite.dat https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat
 
-RUN chmod +x /app/x-ui /app/bin/xray-linux-amd64
+# Startup script: ensure bin/ exists at CWD
+COPY start.sh /start.sh
+RUN chmod +x /start.sh /app/x-ui /app/bin/xray-linux-amd64
 
 WORKDIR /app
 
 EXPOSE 2053
 
-CMD ["./x-ui"]
+ENTRYPOINT ["/start.sh"]
