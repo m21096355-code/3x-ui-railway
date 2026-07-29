@@ -1,6 +1,11 @@
-FROM alpine:3.18
+FROM debian:bookworm-slim
 
-RUN apk add --no-cache bash curl tzdata
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Europe/Amsterdam
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    bash curl ca-certificates tzdata \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install 3x-ui
 RUN mkdir -p /etc/x-ui /var/log/x-ui && \
@@ -11,7 +16,6 @@ RUN mkdir -p /etc/x-ui /var/log/x-ui && \
 
 ENV XRAY_HIGH_LOGLEVEL=warning
 ENV XRAY_SUB_PATH=sub
-ENV TZ=Europe/Amsterdam
 
 EXPOSE 2053 2083 2087 2096 80 443
 
