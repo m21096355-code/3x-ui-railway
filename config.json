@@ -1,6 +1,6 @@
 {
   "log": {
-    "loglevel": "warning"
+    "loglevel": "info"
   },
   "routing": {
     "domainStrategy": "AsIs",
@@ -23,13 +23,10 @@
         "decryption": "none"
       },
       "streamSettings": {
-        "network": "ws",
+        "network": "grpc",
         "security": "none",
-        "wsSettings": {
-          "headers": {
-            "Host": "3x-ui-railway-production-9401.up.railway.app"
-          },
-          "path": "/ws"
+        "grpcSettings": {
+          "serviceName": "grpc"
         }
       },
       "sniffing": {
