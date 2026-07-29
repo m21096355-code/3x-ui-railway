@@ -1,22 +1,36 @@
-FROM ubuntu:22.04
-ENV DEBIAN_FRONTEND=noninteractive
+FROM alpine:3.19
+
 ENV TZ=Europe/Amsterdam
-RUN apt-get update && apt-get install -y --no-install-recommends bash curl ca-certificates tzdata wget unzip && rm -rf /var/lib/apt/lists/*
+ENV XUI_IN_DOCKER=true
 
-# Download 3x-ui
-RUN cd /tmp && wget -q https://github.com/MHSanaei/3x-ui/releases/latest/download/x-ui-linux-amd64.tar.gz && tar -xzf x-ui-linux-amd64.tar.gz && mv x-ui/x-ui /usr/local/bin/x-ui && chmod +x /usr/local/bin/x-ui && rm -rf x-ui x-ui-linux-amd64.tar.gz
+RUN apk add --no-cache bash curl ca-certificates tzdata fail2ban openssl
 
-# Download Xray core
-RUN cd /tmp && wget -q https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip && unzip -o Xray-linux-64.zip && chmod +x xray
+# Download 3x-ui release
+RUN mkdir -p /app/bin && \
+    cd /tmp && \
+    curl -fsSL -o x-ui.tar.gz https://github.com/MHSanaei/3x-ui/releases/latest/download/x-ui-linux-amd64.tar.gz && \
+    tar -xzf x-ui.tar.gz && \
+    mv x-ui/x-ui /app/x-ui && \
+    chmod +x /app/x-ui && \
+    rm -rf /tmp/x-ui*
 
-# Copy xray to ALL possible locations + create bin/ at every possible CWD
-RUN mkdir -p /app/bin /root/bin /home/bin /tmp/bin /var/bin && \
-    for d in /app /root /home /tmp /var /; do \
-        mkdir -p "$d/bin" && cp /tmp/xray "$d/bin/xray-linux-amd64" && chmod +x "$d/bin/xray-linux-amd64"; \
-    done && \
-    cp /tmp/xray /usr/local/bin/xray && chmod +x /usr/local/bin/xray && \
-    rm -f /tmp/xray /tmp/Xray-linux-64.zip
+# Download Xray core into /app/bin/
+RUN cd /tmp && \
+    curl -fsSL -o xray.zip https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip && \
+    unzip -o xray.zip && \
+    mv xray /app/bin/xray-linux-amd64 && \
+    chmod +x /app/bin/xray-linux-amd64 && \
+    rm -f /tmp/xray.zip /tmp/geoip.dat /tmp/geosite.dat
 
-ENV XRAY_HIGH_LOGLEVEL=warning
-EXPOSE 2053 2083 2087 2096 80 443
-CMD ["x-ui"]
+# Download geo data
+RUN cd /app && \
+    curl -fsSL -o geoip.dat https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat && \
+    curl -fsSL -o geosite.dat https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat
+
+RUN chmod +x /app/x-ui /app/bin/xray-linux-amd64
+
+WORKDIR /app
+
+EXPOSE 2053
+
+CMD ["./x-ui"]
