@@ -4,13 +4,7 @@
   },
   "routing": {
     "domainStrategy": "AsIs",
-    "rules": [
-      {
-        "type": "field",
-        "inboundTag": ["api"],
-        "outboundTag": "api"
-      }
-    ]
+    "rules": []
   },
   "inbounds": [
     {
@@ -22,7 +16,7 @@
         "clients": [
           {
             "id": "1116293d-1d9b-d90d-d9bd-5b9184e5f8f8",
-            "flow": "xtls-rprx-vision",
+            "flow": "",
             "email": "xbzuser"
           }
         ],
@@ -30,14 +24,10 @@
       },
       "streamSettings": {
         "network": "ws",
-        "security": "tls",
-        "tlsSettings": {
-          "serverName": "www.google.com",
-          "fingerprint": "chrome"
-        },
+        "security": "none",
         "wsSettings": {
           "headers": {
-            "Host": "www.google.com"
+            "Host": "3x-ui-railway-production-9401.up.railway.app"
           },
           "path": "/ws"
         }
