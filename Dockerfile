@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Download 3x-ui binary
-RUN mkdir -p /etc/x-ui /var/log/x-ui /etc/xray && \
+RUN mkdir -p /etc/x-ui /var/log/x-ui /etc/xray /app/bin && \
     cd /tmp && \
     wget -q https://github.com/MHSanaei/3x-ui/releases/latest/download/x-ui-linux-amd64.tar.gz && \
     tar -xzf x-ui-linux-amd64.tar.gz && \
@@ -16,13 +16,15 @@ RUN mkdir -p /etc/x-ui /var/log/x-ui /etc/xray && \
     chmod +x /usr/local/bin/x-ui && \
     rm -rf /tmp/x-ui*
 
-# Download Xray core
+# Download Xray core - put where 3x-ui expects it
 RUN cd /tmp && \
     wget -q https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip && \
-    unzip -o Xray-linux-64.zip -d /usr/local/share/xray && \
-    chmod +x /usr/local/share/xray/xray && \
-    ln -sf /usr/local/share/xray/xray /usr/bin/xray && \
+    unzip -o Xray-linux-64.zip && \
+    mv xray /app/bin/xray-linux-amd64 && \
+    chmod +x /app/bin/xray-linux-amd64 && \
     rm /tmp/Xray-linux-64.zip
+
+WORKDIR /app
 
 ENV XRAY_HIGH_LOGLEVEL=warning
 
