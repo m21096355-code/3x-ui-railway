@@ -3,8 +3,9 @@ FROM alpine:3.19
 ENV TZ=Europe/Amsterdam
 ENV XUI_IN_DOCKER=true
 ENV XUI_BIN_FOLDER=/app/bin
+ENV XUI_PORT=2054
 
-RUN apk add --no-cache bash curl ca-certificates tzdata openssl
+RUN apk add --no-cache bash curl ca-certificates tzdata openssl jq
 
 # Download 3x-ui release
 RUN mkdir -p /app/bin /etc/x-ui /var/log/x-ui && \
@@ -23,15 +24,17 @@ RUN cd /tmp && \
     chmod +x /app/bin/xray-linux-amd64 && \
     rm -f /tmp/xray.zip
 
-# Download geo data to /app/bin/ (where XRAY looks for it)
+# Download geo data to /app/bin/
 RUN cd /app/bin && \
     curl -fsSL -o geoip.dat https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat && \
     curl -fsSL -o geosite.dat https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat
 
-RUN chmod +x /app/x-ui /app/bin/xray-linux-amd64
+# Copy startup script
+COPY start.sh /start.sh
+RUN chmod +x /start.sh /app/x-ui /app/bin/xray-linux-amd64
 
 WORKDIR /app
 
 EXPOSE 2053
 
-CMD ["./x-ui"]
+CMD ["/start.sh"]
