@@ -7,29 +7,28 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     bash curl ca-certificates tzdata wget unzip \
     && rm -rf /var/lib/apt/lists/*
 
-# Download 3x-ui + Xray
+# Download 3x-ui
 RUN cd /tmp && \
     wget -q https://github.com/MHSanaei/3x-ui/releases/latest/download/x-ui-linux-amd64.tar.gz && \
     tar -xzf x-ui-linux-amd64.tar.gz && \
     mv x-ui/x-ui /usr/local/bin/x-ui && \
     chmod +x /usr/local/bin/x-ui && \
-    rm -rf x-ui x-ui-linux-amd64.tar.gz && \
+    rm -rf x-ui x-ui-linux-amd64.tar.gz
+
+# Download Xray core
+RUN cd /tmp && \
     wget -q https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip && \
     unzip -o Xray-linux-64.zip && \
-    chmod +x xray && \
-    mkdir -p bin && \
-    cp xray bin/xray-linux-amd64 && \
-    rm Xray-linux-64.zip
+    chmod +x xray
 
-# x-ui looks for bin/xray-linux-amd64 relative to /bin, /app/bin, and WORKDIR
-RUN mkdir -p /app/bin /bin && \
-    cp /tmp/xray /app/bin/xray-linux-amd64 2>/dev/null; \
-    cp /tmp/xray /bin/xray-linux-amd64 2>/dev/null; \
-    cp /tmp/xray /usr/local/bin/xray 2>/dev/null; \
-    true
-
-# Find xray from where we downloaded it  
+# x-ui launches xray as: bin/xray-linux-amd64 (relative to WORKDIR)
+# xray also writes config to bin/ (relative to its CWD = WORKDIR)
+# So we need bin/ directory at WORKDIR with xray inside
 WORKDIR /root
+RUN mkdir -p /root/bin && \
+    cp /tmp/xray /root/bin/xray-linux-amd64 && \
+    chmod +x /root/bin/xray-linux-amd64 && \
+    rm -f /tmp/xray /tmp/Xray-linux-64.zip
 
 ENV XRAY_HIGH_LOGLEVEL=warning
 EXPOSE 2053 2083 2087 2096 80 443
