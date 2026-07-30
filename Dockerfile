@@ -1,1 +1,1 @@
-FROM bfb9b1/3x-ui:latest
+FROM ghcr.io/mhsanaei/3x-ui:latest
